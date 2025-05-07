@@ -1,0 +1,483 @@
+/*
+ * Custom CSS file. Override it as you like.
+ *
+ * Credits to @killercup (https://gist.github.com/killercup); Extracted from this Gist:
+ *   https://gist.github.com/killercup/5917178
+ * Substantial modifications made by natolambert
+ */
+
+html {
+    font-size: 100%;
+    overflow-y: scroll;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+body {
+    color: #444;
+    font-family: Georgia, Palatino, 'Palatino Linotype', Times, 'Times New Roman', serif;
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 1em;
+    margin: auto;
+    max-width: 42em;
+    background: #fefefe;
+}
+
+a {
+    color: #0645ad;
+    text-decoration: none;
+}
+
+a:visited {
+    color: #0b0080;
+}
+
+a:hover {
+    color: #06e;
+}
+
+a:active {
+    color: #faa700;
+}
+
+a:focus {
+    outline: thin dotted;
+}
+
+*::-moz-selection {
+    background: rgba(255, 255, 0, 0.3);
+    color: #000;
+}
+
+*::selection {
+    background: rgba(255, 255, 0, 0.3);
+    color: #000;
+}
+
+a::-moz-selection {
+    background: rgba(255, 255, 0, 0.3);
+    color: #0645ad;
+}
+
+a::selection {
+    background: rgba(255, 255, 0, 0.3);
+    color: #0645ad;
+}
+
+p {
+    margin: 1em 0;
+}
+
+img {
+    max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #111;
+    line-height: 125%;
+    margin-top: 2em;
+    font-weight: normal;
+    position: relative;
+}
+
+/* Heading anchor link styles */
+.header-anchor {
+    opacity: 0;
+    font-size: 0.8em;
+    vertical-align: middle;
+    position: absolute;
+    margin-left: 0.3em;
+    transition: opacity 0.2s ease-in-out;
+}
+
+h2:hover .header-anchor,
+h3:hover .header-anchor,
+h4:hover .header-anchor,
+h5:hover .header-anchor,
+h6:hover .header-anchor {
+    opacity: 1;
+}
+
+h4,
+h5,
+h6 {
+    font-weight: bold;
+}
+
+h1 {
+    font-size: 2.5em;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+h3 {
+    font-size: 1.5em;
+}
+
+h4 {
+    font-size: 1.2em;
+}
+
+h5 {
+    font-size: 1em;
+}
+
+h6 {
+    font-size: 0.9em;
+}
+
+blockquote {
+    color: #666666;
+    margin: 0;
+    padding-left: 3em;
+    border-left: 0.5em #EEE solid;
+}
+
+hr {
+    display: block;
+    height: 2px;
+    border: 0;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #eee;
+    margin: 1em 0;
+    padding: 0;
+}
+
+pre,
+code,
+kbd,
+samp {
+    color: #000;
+    font-family: monospace, monospace;
+    _font-family: 'courier new', monospace;
+    font-size: 0.98em;
+}
+
+pre {
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+
+b,
+strong {
+    font-weight: bold;
+}
+
+dfn {
+    font-style: italic;
+}
+
+ins {
+    background: #ff9;
+    color: #000;
+    text-decoration: none;
+}
+
+mark {
+    background: #ff0;
+    color: #000;
+    font-style: italic;
+    font-weight: bold;
+}
+
+sub,
+sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup {
+    top: -0.5em;
+}
+
+sub {
+    bottom: -0.25em;
+}
+
+ul,
+ol {
+    margin: 1em 0;
+    padding: 0 0 0 2em;
+}
+
+li p:last-child {
+    margin-bottom: 0;
+}
+
+ul ul,
+ol ol {
+    margin: .3em 0;
+}
+
+dl {
+    margin-bottom: 1em;
+}
+
+dt {
+    font-weight: bold;
+    margin-bottom: .8em;
+}
+
+dd {
+    margin: 0 0 .8em 2em;
+}
+
+dd:last-child {
+    margin-bottom: 0;
+}
+
+img {
+    border: 0;
+    -ms-interpolation-mode: bicubic;
+    vertical-align: middle;
+}
+
+figure {
+    display: block;
+    text-align: center;
+    margin: 1em 0;
+}
+
+figure img {
+    border: none;
+    margin: 0 auto;
+}
+
+figcaption {
+    font-size: 0.8em;
+    font-style: italic;
+    margin: 0 0 .8em;
+}
+
+/* for html tables */
+table {
+    margin-bottom: 2em;
+    border-bottom: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-spacing: 0;
+    box-shadow: none;
+    border: none;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    width: auto; /* Ensures the table doesn't stretch full-width */
+    display: table;
+}
+
+th {
+    padding: 12px;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #ddd;
+}
+
+td {
+    padding: 12px;
+    text-align: left; /* Keeps data cells left-aligned */
+    border: 1px solid #ddd;
+    vertical-align: top;
+}
+
+.author {
+    font-size: 1.2em;
+    text-align: center;
+}
+
+/* Target only mobile screens */
+@media only screen and (max-width: 479px) {
+    body {
+        font-size: 14px;
+    }
+}
+
+@media only screen and (min-width: 480px) {
+    body {
+        font-size: 15px;
+    }
+}
+
+@media only screen and (min-width: 768px) {
+    body {
+        font-size: 16px;
+    }
+}
+
+@media print {
+    * {
+        background: transparent !important;
+        color: black !important;
+        filter: none !important;
+        -ms-filter: none !important;
+    }
+    body {
+        font-size: 12pt;
+        max-width: 100%;
+    }
+    a,
+    a:visited {
+        text-decoration: underline;
+    }
+    hr {
+        height: 1px;
+        border: 0;
+        border-bottom: 1px solid black;
+    }
+    a[href]:after {
+        content: " (" attr(href) ")";
+    }
+    abbr[title]:after {
+        content: " (" attr(title) ")";
+    }
+    .ir a:after,
+    a[href^="javascript:"]:after,
+    a[href^="#"]:after {
+        content: "";
+    }
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        padding-right: 1em;
+        page-break-inside: avoid;
+    }
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+    img {
+        max-width: 100% !important;
+    }
+    @page :left {
+        margin: 15mm 20mm 15mm 10mm;
+    }
+    @page :right {
+        margin: 15mm 10mm 15mm 20mm;
+    }
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+}
+
+.dropdown-content {
+  display: none;
+}
+
+
+
+thead {
+    background-color: #f5f5f5;
+}
+
+
+.dropdown-content.open {
+  display: block;
+}
+/* Header Nav Block */
+    .chapter-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        /* grid-template-rows: auto auto;  */
+        gap: 0.5rem;
+        padding: 0.5rem;
+        max-width: 1200px;
+        text-align: left;
+    }  
+    .section {
+        background-color: #ffffff;
+        padding-top: 5px;
+        padding-right: 12px;
+        padding-bottom: 8px;
+        padding-left: 12px;
+        border-radius: 5px;
+        text-align: left;
+    }
+  .dropdown-content.open {
+    max-height: 2000px;
+  }
+  .dropdown-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background: #f8f8f8;  /* Unified with section background */
+  }
+  /* dropdown row */
+  .dropdown-button {
+    width: 100%;
+    text-align: left;
+    padding: 0.5rem;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+  }
+  /* carrot button */
+  .dropdown-button .chevron {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.2s;
+  }
+  /* dropdown animation */
+  .dropdown-button[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+  }
+  .section h3 {
+    font-weight: bold;
+    font-size: 0.8rem;
+    margin-top: 5px;
+    margin-bottom: 5px;  /* or whatever bottom spacing you prefer */
+  }
+  .section ol, .section ul {
+    margin: 0;
+    padding-left: 20px;
+    text-align: left;
+  }
+  .section li {
+    font-size: 12px;
+    line-height: 1.3;
+    margin-bottom: 3px;
+    text-align: left;
+  }
+  .section a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  .section a:hover {
+    text-decoration: underline;
+  }
+
+  /* Mobile Responsiveness */
+  @media screen and (max-width: 768px) {
+    .chapter-nav {
+      grid-template-columns: 1fr;
+    }
+    .section {
+      margin-bottom: 10px;
+    }
+    .section p {
+      font-size: 16px;
+    }
+    .section li {
+      font-size: 14px;
+    }
+  }
