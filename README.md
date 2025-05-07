@@ -1,5 +1,5 @@
 # RLHF 中文手册  
-可以直接下载RLHF-book-Chinese.pdf文件进行阅读
+**可以直接下载[`RLHF-book-Chinese`](https://github.com/jweihe/RLHF-book-Chinese/blob/main/RLHF-book-Chinese.pdf)进行阅读**
 
 本手册是 [`rlhf-book`](https://github.com/natolambert/rlhf-book) 的中文翻译版本，旨在为中文社区提供基于人类反馈的强化学习（RLHF）的简明技术指南。原项目由 Nathan Lambert 创作，本翻译版本在保留原内容核心的基础上，优化了中文表达以提升可读性。
 
