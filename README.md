@@ -20,7 +20,7 @@
   subtitle     = {基于人类反馈的强化学习技术指南（中文翻译版）},
   year         = {2025},
   url          = {https://github.com/jweihe/RLHF-book-Chinese},
-  note         = {翻译自 Nathan Lambert 原英文手册《Reinforcement Learning from Human Feedback》（2024）}
+  note         = {翻译自 Nathan Lambert 原英文手册《Reinforcement Learning from Human Feedback》（2025）}
 }
 ```
 
