@@ -22,7 +22,7 @@ $$J(\pi) = \mathbb{E}_{\tau \sim \pi} \left[ \sum_{t=0}^{\infty} \gamma^t r(s_t,
 
 ![标准RL循环](images/rl.png){#fig:rl width=320px .center}
 
-@fig:rl 展示了标准RL循环的示意图，并可与@fig:rlhf进行对比。
+@fig:rl 展示了标准RL循环的示意图，并可与[@fig:rlhf]进行对比。
 
 ## 标准RL设置的调整
 
@@ -55,7 +55,7 @@ $$J(\pi) = \mathbb{E}_{\tau \sim \pi} \left[r_\theta(s_t, a_t) \right].$$ {#eq:r
 ## RLHF典型流程示例
 
 ChatGPT发布时的经典RLHF流程，是以RLHF为核心的三步后训练方案 [@lambert2022illustrating] [@ouyang2022training] [@bai2022training]。
-在“基础”语言模型（即大规模网页文本上训练的next-token预测模型）之上，依次进行如下三步（见@fig:rlhf-basic-repeat）：
+在“基础”语言模型（即大规模网页文本上训练的next-token预测模型）之上，依次进行如下三步（见[@fig:rlhf-basic-repeat]）：
 
 1. **约1万条数据的指令微调**：让模型学会问答格式，并通过人类编写的数据掌握基础能力。
 2. **约10万对成对prompt上的奖励模型训练**：在指令微调后的模型基础上训练奖励模型，捕捉多样化的价值观。奖励模型作为RLHF的优化目标。
@@ -66,7 +66,7 @@ ChatGPT发布时的经典RLHF流程，是以RLHF为核心的三步后训练方�
 ![早期RLHF三阶段流程示意图：SFT、奖励模型、优化。](images/rlhf-basic.png){#fig:rlhf-basic-repeat}
 
 现代后训练流程通常涉及更多模型版本。  
-如下@fig:rlhf-complex所示，模型在收敛前要经历多轮训练迭代。
+如下[@fig:rlhf-complex]所示，模型在收敛前要经历多轮训练迭代。
 
 ![现代后训练多轮流程示意图。](images/rlhf-complex.png){#fig:rlhf-complex}
 

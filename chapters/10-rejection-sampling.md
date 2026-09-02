@@ -175,7 +175,7 @@ np.allclose(x, x_sorted[np.argsort(sorted_indices)])
 ### 微调
 
 选出补全后，即可对当前模型进行标准的指令微调。
-更多细节可参考[指令微调章节](https://rlhfbook.com/c/instructions.html)。
+更多细节可参考[指令微调章节](09-instruction-tuning.html)。
 
 ### 细节说明
 
@@ -185,7 +185,7 @@ np.allclose(x, x_sorted[np.argsort(sorted_indices)])
 - **每个prompt生成补全数**：成功案例通常每个prompt生成10~30个甚至更多补全。太少会导致训练偏差或噪声大。
 - **指令微调细节**：拒绝采样阶段的指令微调细节未有公开标准，可能与初始指令微调略有不同。
 - **多模型生成**：有些实现会用多个模型生成补全，而非仅用当前待训练模型。最佳实践尚无定论。
-- **奖励模型训练**：奖励模型的训练质量极大影响最终效果。更多内容参见[奖励建模章节](https://rlhfbook.com/c/07-reward-models.html)。
+- **奖励模型训练**：奖励模型的训练质量极大影响最终效果。更多内容参见[奖励建模章节](07-reward-models.html)。
 
 #### 实用技巧
 
