@@ -32,14 +32,14 @@ $$ \mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_c
 
 $$r(x, y) = \beta  \log \frac{\pi_r(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$$ {#eq:dpo_reward}
 
-这个奖励来自Bradley-Terry模型下的最优策略推导（见@eq:dpo_opt_policy）。
+这个奖励来自Bradley-Terry模型下的最优策略推导（见[@eq:dpo_opt_policy]）。
 本质上，DPO的隐式奖励模型用“最优策略下人类偏好数据的概率”替代了外部奖励模型。
 
-观察@eq:dpo_core中的损失，优化目标是让选中回复的log比率大于被拒回复（归一化参考模型）。
+观察[@eq:dpo_core]中的损失，优化目标是让选中回复的log比率大于被拒回复（归一化参考模型）。
 实际中，这就是对模型在数据中token序列的log概率求和。
 因此，DPO实质上是在拉大选中与被拒回复概率的差距。
 
-有了@eq:dpo_reward中的奖励，我们可以写出损失的梯度，进一步理解机制：
+有了[@eq:dpo_reward]中的奖励，我们可以写出损失的梯度，进一步理解机制：
 
 $$\nabla_{\theta}\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) = -\beta \mathbb{E}_{(x, y_c, y_r)\sim \mathcal{D}}\left[ \sigma\left(r_{\theta}(x, y_r) - r_{\theta}(x, y_c)\right) \left(\nabla_{\theta}\log \pi(y_c \mid x) - \nabla_{\theta}\log \pi(y_r \mid x)\right) \right] $$ {#eq:dpo_gradient}
 
@@ -110,7 +110,7 @@ $$ \pi^*(y|x) = \pi(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\left(\frac{1}
 
 $$p^*(y_1 \succ y_2 \mid x) = \frac{\exp\left(r^*(x,y_1)\right)}{\exp\left(r^*(x,y_1)\right) + \exp\left(r^*(x, y_2)\right)} $$ {#eq:bradley_terry_dpo}
 
-对@eq:dpo_opt_policy取对数并代入，得DPO奖励：
+对[@eq:dpo_opt_policy]取对数并代入，得DPO奖励：
 
 $$r^*(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \beta \log Z(x)$$ {#eq:dpo_reward_full}
 
@@ -118,11 +118,11 @@ $$r^*(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\text{ref}}(y \mid x)} + \b
 
 $$p^*(y_1 \succ y_2 \mid x) = \sigma\left(\beta \log \frac{\pi^*(y_1 \mid x)}{\pi_{\text{ref}}(y_1 \mid x)} - \beta \log \frac{\pi^*(y_2 \mid x)}{\pi_{\text{ref}}(y_2 \mid x)}\right) $$ {#eq:dpo_loss_deriv3}
 
-这正是DPO的损失函数（见@eq:dpo_core）。
+这正是DPO的损失函数（见[@eq:dpo_core]）。
 
 #### 3. Bradley-Terry DPO梯度推导
 
-DPO梯度如@eq:dpo_gradient所示，推导如下：
+DPO梯度如[@eq:dpo_gradient]所示，推导如下：
 
 $$\nabla_{\theta}\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) = -\nabla_{\theta}\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}\left[ \log \sigma\left(\beta \log \frac{\pi_{\theta}(y_c|x)}{\pi_{\text{ref}}(y_c|x)} - \beta \log \frac{\pi_{\theta}(y_r|x)}{\pi_{\text{ref}}(y_r|x)}\right)\right] $$ {#eq:dpo_grad_0}
 
@@ -148,7 +148,7 @@ DPO算法已出现多种变体，旨在解决其局限。
 ![DPO中的偏好“位移”问题示意。](images/dpo_displacement.png){#fig:dpo_issue .center}
 
 DPO的一个突出问题是：优化目标仅仅是拉大选中与被拒回复概率的间隔。
-数值上，模型会降低两者的概率，但被拒回复降得更多（见@fig:dpo_issue）。
+数值上，模型会降低两者的概率，但被拒回复降得更多（见[@fig:dpo_issue]）。
 这对泛化的影响尚不明确，有研究认为这会提升未被覆盖行为的概率 [@razin2024unintentional] [@ren2024learning]。
 如Cal-DPO [@xiao2024cal]、AlphaPO [@gupta2025alphapo]等方法通过调整优化过程或奖励形状缓解这种**偏好位移**。
 实际影响尚不明朗，但这可能是在线RL方法优于DPO的原因之一。

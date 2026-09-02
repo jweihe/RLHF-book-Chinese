@@ -40,7 +40,7 @@ PANDOC_COMMAND = pandoc
 # Per-format options
 
 DOCX_ARGS = --standalone --reference-doc templates/docx.docx
-EPUB_ARGS = --template templates/epub.html --epub-cover-image $(COVER_IMAGE)
+EPUB_ARGS = --template templates/epub.html --epub-cover-image $(COVER_IMAGE) --mathml
 HTML_ARGS = --template templates/html.html --standalone --to html5 --listings
 # PDF_ARGS = --template templates/pdf.tex --pdf-engine xelatex --listings 
 PDF_ARGS = --template templates/pdf.tex --pdf-engine xelatex --listings --variable mainfont="Noto Serif CJK SC" --variable sansfont="Noto Sans CJK SC" --variable monofont="Noto Sans Mono CJK SC"  # 等宽中文字体
@@ -144,6 +144,7 @@ $(NESTED_HTML_DIR)/%.html: chapters/%.md $(HTML_DEPENDENCIES)
 
 # Single rule for building all nested HTML
 nested_html: $(CHAPTER_HTMLS)
+	cp -r images $(NESTED_HTML_DIR)
 	@echo "All nested HTML files built"
 
 # Main HTML target
@@ -151,6 +152,10 @@ $(BUILD)/html/$(OUTPUT_FILENAME_HTML).html: nested_html
 	$(MKDIR_CMD) $(BUILD)/html
 	$(CONTENT) | $(CONTENT_FILTERS) | $(PANDOC_COMMAND) $(ARGS) $(HTML_ARGS) -o $@
 	$(COPY_CMD) $(IMAGES) $(BUILD)/html/
+	cp ./templates/nav.js $(BUILD)/html/
+	cp ./templates/nav.js $(BUILD)/html/c/
+	cp ./templates/header-anchors.js $(BUILD)/html/
+	cp ./templates/header-anchors.js $(BUILD)/html/c/
 	@echo "Main HTML index built"
 
 # ArXiv‑compatible LaTeX build rule
