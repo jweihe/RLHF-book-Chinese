@@ -31,7 +31,7 @@ RLHF或偏好微调方法，常被用于提升AlpacaEval等自动榜单分数，
 
 DPO与PPO大行其道时，曾有不少论文发布了惊艳的榜单分数，但模型权重并未广泛流传。
 实际上，7B参数量的模型无论怎么对齐，都不可能在综合基准上击败GPT-4——这一点看似显然，但仍有论文声称做到了。
-@fig:DNO为Direct Nash Optimization（DNO）论文中的结果，声称其小模型在AlpacaEval等评测上超越了GPT-4。
+[@fig:DNO]为Direct Nash Optimization（DNO）论文中的结果，声称其小模型在AlpacaEval等评测上超越了GPT-4。
 这类挑战往往出现在学术激励与技术快速产业化交汇之际。
 
 ![Direct Nash Optimization（DNO）论文结果：小模型“超越”GPT-4。Rosset等，2024，CC-BY许可。](images/dno-figure.png){#fig:DNO width=550px}

@@ -137,7 +137,7 @@ AI反馈数据也是如此——目前主流AI模型中究竟人类偏好数据�
 #### 其他方式
 
 除了上述主流方法，还有许多尚未被广泛探索的RLHF反馈数据收集方式。  
-例如，可以用单个数据点配合方向性标签（如上文@fig:up-down的Ai2 playground例子），并结合专为单向信号设计的算法（如Kahneman-Tversk Optimization，KTO）[@ethayarajh2024kto]。
+例如，可以用单个数据点配合方向性标签（如上文[@fig:up-down]的Ai2 playground例子），并结合专为单向信号设计的算法（如Kahneman-Tversk Optimization，KTO）[@ethayarajh2024kto]。
 也有研究提出用更细粒度的反馈信号（如token级别 [@wu2024fine]），或用自然语言直接评价（如书写反馈 [@chen2024learning]），以获得更丰富的学习信号，但这也会带来更复杂的数据收集流程。
 
 ### 数据采购与合同

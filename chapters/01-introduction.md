@@ -1,6 +1,6 @@
 ---
 prev-chapter: "主页"
-prev-url: "https://rlhfbook.com/"
+prev-url: "../index.html"
 page-title: 引言
 next-chapter: "关键相关工作"
 next-url: "02-related-works.html"
@@ -21,7 +21,7 @@ RLHF的基本流程包含三个核心步骤：
 
 RLHF已被成功应用于多个领域，随着技术的成熟，其复杂性也在不断提升。  
 早期RLHF的突破性实验包括：深度强化学习 [@christiano2017deep]、文本摘要 [@stiennon2020learning]、指令跟随 [@ouyang2022training]、网页信息解析问答 [@nakano2021webgpt] 以及“对齐”（alignment）[@bai2022training] 等。  
-下图总结了早期RLHF的基本流程（见@fig:rlhf-basic）。
+下图总结了早期RLHF的基本流程（见[@fig:rlhf-basic]）。
 
 ![早期RLHF三阶段流程示意图：SFT、奖励模型、优化。](images/rlhf-basic.png){#fig:rlhf-basic}
 

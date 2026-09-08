@@ -40,7 +40,7 @@ $$ D_{KL}(P || Q) = \sum_{x \in \mathcal{X}} P(x) \log \left(\frac{P(x)}{Q(x)}\r
 KL惩罚最常见的实现方式，是将训练过程中的生成token与静态参考模型的输出进行比较。
 直观上，这意味着你希望训练出来的模型风格尽量接近参考模型。
 参考模型通常是指令微调后的模型，也可以是之前某个RL检查点。
-用上面的公式，采样模型为$P^{\text{RL}}(x)$，参考模型为$P^{\text{Ref.}}(x)$，如@eq:kl_standard所示。
+用上面的公式，采样模型为$P^{\text{RL}}(x)$，参考模型为$P^{\text{Ref.}}(x)$，如[@eq:kl_standard]所示。
 早在大语言模型流行之前，KL距离就被用于对话智能体 [@jaques2017sequence]，之后KL正则很快成为预训练模型微调的核心技术 [@jaques2020human]。
 
 ### 实现示例
@@ -89,7 +89,7 @@ kl_full   = F.kl_div(ref_logprobs, logprobs, reduction='batchmean')
 
 另一种正则化视角，是希望模型保持对某个*数据集*的拟合能力，这在InstructGPT中被用来“修复在公开NLP数据集上的性能回退” [@ouyang2022training]。
 为此，可以对RLHF的训练目标进行如下调整：
-基于@eq:rl_start，采样RL策略模型的补全$y$和prompt $x$，优化目标为：
+基于[@eq:rl_start]，采样RL策略模型的补全$y$和prompt $x$，优化目标为：
 
 $$
 \text{objective} (\theta) = \mathbb{E}_{(x,y) \sim \mathcal{D}_{\pi^{\text{RL}}_{\theta}}} \left[ r_{\theta}(x, y) - \lambda r_{\text{reg.}} \right]
