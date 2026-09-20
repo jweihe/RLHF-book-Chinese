@@ -25,8 +25,8 @@ class NavigationDropdown extends HTMLElement {
         <ul>
           <li><a href="${base}index.html">首页</a></li>
           <li><a href="https://github.com/jweihe/RLHF-book-Chinese">GitHub 仓库</a></li>
-          <li><a href="${base}book.pdf">PDF</a> / <a href="https://arxiv.org/abs/2504.12501"> Arxiv </a></li>
-          <li class="inactive">订购纸质版（即将上线）</li>
+          <li><a href="https://github.com/jweihe/RLHF-book-Chinese/raw/refs/heads/main/RLHF-book-Chinese.pdf">PDF</a> / <a href="https://arxiv.org/abs/2504.12501"> Arxiv </a></li>
+          <li><a href="https://github.com/jweihe/RLHF-book-Chinese/issues/new/choose">纠错与建议</a></li>
         </ul>
       </div>
 

@@ -1,0 +1,23 @@
+name: 翻译、公式或内容纠错
+description: 报告术语、译文、公式、引用或版本差异
+title: "[内容] "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: 章节与位置
+      description: 文件名、小节、链接，或 PDF 版本与页码
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 原文与问题
+      description: 引用短片段，说明哪里不准确或难以理解。
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 建议与依据（可选）
+      description: 可附英文原文版本、公开链接、公式推导或建议译法；暂时没有修改方案也欢迎反馈。

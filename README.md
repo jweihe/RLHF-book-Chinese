@@ -1,227 +1,108 @@
-# RLHF 中文手册
+# RLHF 中文手册 · RLHF Book Chinese
 
-[![代码许可证](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/jweihe/RLHF-book-Chinese/blob/main/LICENSE-Code.md)
-[![内容许可证](https://img.shields.io/badge/license-CC--BY--NC--SA--4.0-lightgrey)](https://github.com/jweihe/RLHF-book-Chinese/blob/main/LICENSE-Content.md)
-[![构建状态](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/jweihe/RLHF-book-Chinese)
-[![Pandoc](https://img.shields.io/badge/built%20with-Pandoc-blue)](https://pandoc.org/)
+[![文档构建](https://github.com/jweihe/RLHF-book-Chinese/actions/workflows/static.yml/badge.svg)](https://github.com/jweihe/RLHF-book-Chinese/actions/workflows/static.yml)
+[![内容许可](https://img.shields.io/badge/content-CC_BY--NC--SA_4.0-blue)](LICENSE-Content.md)
+[![代码许可](https://img.shields.io/badge/code-MIT-green)](LICENSE-Code.md)
+[![欢迎贡献](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 
-> **基于人类反馈的强化学习（RLHF）技术指南**
->
-> 面向语言模型的后训练 RLHF 简明手册，涵盖从基础理论到最新研究进展的完整知识框架。
+**从人类偏好到语言模型后训练：系统学习 SFT、奖励建模、PPO、DPO 与 AI 反馈。**
 
----
+本项目是 Nathan Lambert 开源书籍 [Reinforcement Learning from Human Feedback](https://github.com/natolambert/rlhf-book) 的中文翻译，包含 **19 章**，覆盖基础概念、训练方法、评测与开放问题。适合具有机器学习基础、希望理解大语言模型后训练的学生、工程师和研究者。
 
-## 📖 简介
+**[下载 PDF](https://github.com/jweihe/RLHF-book-Chinese/raw/refs/heads/main/RLHF-book-Chinese.pdf) · [按章阅读](#章节导航) · [提 Issue](https://github.com/jweihe/RLHF-book-Chinese/issues/new/choose) · [Fork 项目](https://github.com/jweihe/RLHF-book-Chinese/fork) · [参与贡献](CONTRIBUTING.md)**
 
-本手册是 [`rlhf-book`](https://github.com/natolambert/rlhf-book) 的中文翻译版本，旨在为中文社区提供高质量的 RLHF 技术资源。
+> **版本说明：** 当前译本元数据标注为 **2025 年 4 月 16 日**，这不是已核实的上游 commit。尚未完成与英文出版版或原站最新版的逐章核对，因此不承诺内容完全一致。仓库 Markdown、预构建 PDF 与 Release 可能处于不同修订版本；阅读最新修订请以 `chapters/` 为准。详见 [版本与常见问题](docs/FAQ.md)。
 
-**主要内容：**
-- RLHF 的技术根源与跨学科理论融合
-- 完整的 RLHF 流程：指令调优 → 奖励模型训练 → 策略优化
-- 关键算法：拒绝采样、强化学习、直接对齐
-- 前沿话题：合成数据、评估方法、过优化问题
-- 开放性科学问题与研究方向
+## 从哪里开始
 
-**适合读者：**
-- 具有定量分析背景的研究者
-- 对大语言模型训练感兴趣的开发者
-- 想深入了解 RLHF 技术原理的从业者
+- **快速建立全局认识：** 第 1 → 3 → 4 章，理解 RLHF 在后训练中的位置、符号和训练流程。
+- **沿着训练流程学习：** 第 9 → 6 → 7 → 8 → 11 → 12 章，串起 SFT、偏好数据、奖励模型、正则化、PPO 与 DPO。
+- **进一步阅读研究专题：** 第 13–17 章，了解 AI 反馈、推理、合成数据、评测与过度优化。
 
----
+建议具备概率、梯度优化与 Transformer 基础；强化学习术语可从第 3 章查起。本仓库以教材内容和示例为主，不是可直接启动大规模训练的框架。
 
-## 📥 快速开始
+## 阅读方式
 
-### 阅读手册
+| 方式 | 入口与说明 |
+| --- | --- |
+| PDF | [仓库 PDF](RLHF-book-Chinese.pdf)，适合离线阅读，可能落后于源文件 |
+| Markdown | 下方 19 章链接，适合阅读修订、检索和提交纠错；GitHub 不完整支持 Pandoc 引用语法 |
+| Release | [发布记录](https://github.com/jweihe/RLHF-book-Chinese/releases)；当前 `v1.0` 附件为 PDF |
+| HTML / EPUB | 可在本地生成，见[构建指南](docs/BUILDING.md)；不将未发布的格式标成可下载版本 |
 
-**推荐方式：** 直接下载 [PDF 版本](https://github.com/jweihe/RLHF-book-Chinese/blob/main/RLHF-book-Chinese.pdf) 阅读
+## 章节导航
 
-**其他格式：**
-- [EPUB 版本](https://github.com/jweihe/RLHF-book-Chinese/releases)（适合电子书阅读器）
-- [HTML 版本](https://github.com/jweihe/RLHF-book-Chinese/releases)（适合浏览器阅读）
+| 章 | 主题 | 阅读重点 |
+| --- | --- | --- |
+| 01 | [引言](chapters/01-introduction.md) | RLHF 与后训练的全局图景 |
+| 02 | [关键相关工作](chapters/02-related-works.md) | 技术发展与代表性论文 |
+| 03 | [定义与背景](chapters/03-setup.md) | 语言建模、强化学习及 RLHF 术语 |
+| 04 | [训练概览](chapters/04-optimization.md) | 训练阶段与优化问题 |
+| 05 | [偏好的本质](chapters/05-preferences.md) | 偏好的理论基础与建模假设 |
+| 06 | [偏好数据](chapters/06-preference-data.md) | 数据来源、收集与质量 |
+| 07 | [奖励建模](chapters/07-reward-models.md) | 奖励模型的目标与训练 |
+| 08 | [正则化](chapters/08-regularization.md) | KL 约束及策略偏移 |
+| 09 | [指令微调](chapters/09-instruction-tuning.md) | IFT / SFT 与数据设计 |
+| 10 | [拒绝采样](chapters/10-rejection-sampling.md) | 生成、打分和筛选 |
+| 11 | [策略梯度算法](chapters/11-policy-gradients.md) | PPO、GRPO、RLOO 等方法 |
+| 12 | [直接对齐算法](chapters/12-direct-alignment.md) | DPO 等偏好优化方法 |
+| 13 | [宪法 AI 与 AI 反馈](chapters/13-cai.md) | Constitutional AI、RLAIF 与 LLM 裁判 |
+| 14 | [推理训练与推理时扩展](chapters/14-reasoning.md) | 推理能力与计算预算 |
+| 15 | [合成数据与蒸馏](chapters/15-synthetic.md) | 数据生成与知识迁移 |
+| 16 | [评测](chapters/16-evaluation.md) | 基准、比较与评测设计 |
+| 17 | [过度优化](chapters/17-over-optimization.md) | 奖励过优化与泛化问题 |
+| 18 | [风格与信息](chapters/18-style.md) | 回答风格与信息质量 |
+| 19 | [产品、用户体验与模型个性](chapters/19-character.md) | 后训练与实际用户体验 |
 
-### 本地构建
+参考文献保存在 [`chapters/bib.bib`](chapters/bib.bib)。
 
-如果你想自己构建手册：
+## 本地构建
 
-#### 1. 安装依赖
+HTML / EPUB 需要 Python 3、Make、Pandoc 和版本兼容的 pandoc-crossref；PDF 还需要 XeLaTeX、LaTeX 宏包与中文字体。完整安装步骤、输出位置和常见错误见 [构建指南](docs/BUILDING.md)。
 
-**Linux:**
-```bash
-sudo apt-get install pandoc make texlive-fonts-recommended texlive-xetex
-```
-
-**macOS:**
-```bash
-brew install pandoc make pandoc-crossref
-```
-
-#### 2. 克隆仓库
 ```bash
 git clone https://github.com/jweihe/RLHF-book-Chinese.git
 cd RLHF-book-Chinese
+make html              # 首页、19 个章节页及资源
+make epub              # EPUB，公式使用 MathML
+make check             # 回归测试与 HTML 本地链接检查
 ```
 
-#### 3. 构建文档
-```bash
-make          # 生成所有格式
-make pdf      # 仅生成 PDF
-make epub     # 仅生成 EPUB
-make html     # 仅生成 HTML
-```
+`make pdf` 生成 PDF，`make docx` 生成 Word 文件，`make` 生成全部格式。所有产物位于 `build/`。
 
-构建产物将输出到 `build/` 目录。
+## 欢迎 Fork、Issue 和 PR
 
----
+**不必一次贡献一整章。** 修正一个错字、说明一个公式中的疑问、补上一个失效链接，都能帮助后来的读者。
 
-## 📚 目录结构
+- **发现问题：** [提交 Issue](https://github.com/jweihe/RLHF-book-Chinese/issues/new/choose)，写清章节、原文位置、问题和建议；不确定怎么改也可以报告。
+- **直接改进：** [Fork 仓库](https://github.com/jweihe/RLHF-book-Chinese/fork)，修改 Markdown 并提交 PR。流程与术语规范见 [贡献指南](CONTRIBUTING.md)。
+- **帮助传播：** Star 收藏，将具体章节分享给学习小组、课程或同事，并保留原作者与中文仓库链接。
 
-```
-RLHF-book-Chinese/
-├── chapters/              # 章节源文件（Markdown）
-│   ├── 01-introduction.md
-│   ├── 02-related-works.md
-│   ├── 03-setup.md
-│   ├── 04-optimization.md
-│   ├── 05-preferences.md
-│   ├── 06-preference-data.md
-│   ├── 07-reward-models.md
-│   ├── 08-regularization.md
-│   ├── 09-instruction-tuning.md
-│   ├── 10-rejection-sampling.md
-│   ├── 11-policy-gradients.md
-│   ├── 12-direct-alignment.md
-│   ├── 13-cai.md
-│   ├── 14-reasoning.md
-│   ├── 15-synthetic.md
-│   ├── 16-evaluation.md
-│   ├── 17-over-optimization.md
-│   ├── 18-style.md
-│   ├── 19-character.md
-│   └── bib.bib
-├── images/                # 图片资源
-├── templates/             # Pandoc 模板
-├── metadata.yml           # 元数据配置
-├── Makefile               # 构建脚本
-├── README.md              # 本文件
-├── LICENSE-Code.md        # 代码许可证（MIT）
-├── LICENSE-Content.md     # 内容许可证（CC-BY-NC-SA-4.0）
-└── RLHF-book-Chinese.pdf  # 预构建 PDF
-```
+优先欢迎：翻译校对、术语一致性、公式与引用检查、构建与阅读体验修复，以及有来源的上游版本对照。新增解释请标明「译者注」，避免与原作者观点混淆。
 
----
+## 维护方向
 
-## 📑 章节概览
+- [ ] 逐章记录对应的英文上游版本与差异。
+- [ ] 整理统一术语表与读者勘误。
+- [ ] 校验多格式产物后发布带版本记录的阅读包。
+- [ ] 完成部署验证后提供稳定的在线阅读入口。
 
-| 章节 | 标题 | 主要内容 |
-|------|------|----------|
-| 01 | 简介 | RLHF 概述与技术背景 |
-| 02 | 相关工作 | 文献综述与理论基础 |
-| 03 | 环境设置 | 实验环境与工具配置 |
-| 04 | 优化基础 | RLHF 优化框架介绍 |
-| 05 | 偏好设置 | 人类偏好数据收集 |
-| 06 | 偏好数据 | 数据集构建与处理 |
-| 07 | 奖励模型 | 奖励模型训练方法 |
-| 08 | 正则化 | 模型正则化技术 |
-| 09 | 指令调优 | 指令微调实践 |
-| 10 | 拒绝采样 | 拒绝采样算法 |
-| 11 | 策略梯度 | 策略梯度方法 |
-| 12 | 直接对齐 | 直接偏好优化（DPO）等 |
-| 13 | CAI | 上下文感知指令调优 |
-| 14 | 推理能力 | 推理增强技术 |
-| 15 | 合成数据 | 合成数据生成 |
-| 16 | 评估方法 | 模型评估指标 |
-| 17 | 过优化 | 过优化问题分析 |
-| 18 | 风格控制 | 输出风格调整 |
-| 19 | 性格塑造 | 模型性格定制 |
+这些是开放的贡献方向，不代表已经完成或承诺发布时间。欢迎先用 Issue 讨论范围。
 
----
+## 引用与致谢
 
-## 🔗 引用本手册
+原著作者：[Nathan Lambert](https://github.com/natolambert)。中文翻译维护：[Junwei He](https://github.com/jweihe)；仓库元数据注明使用 GPT-4.1 辅助翻译。感谢 [所有贡献者](https://github.com/jweihe/RLHF-book-Chinese/graphs/contributors)，以及 [Pandoc](https://pandoc.org/) 和 [pandoc-book-template](https://github.com/wikiti/pandoc-book-template)。
 
-如果你在研究或项目中使用了本手册，请按以下格式引用：
+引用具体理论或研究时，请引用原著及对应论文；引用本中文资源时，可使用：
 
 ```bibtex
-@book{rlhf-chinese-handbook-2025,
-  author       = {He, Junwei},
-  title        = {RLHF 中文手册},
-  subtitle     = {基于人类反馈的强化学习技术指南},
-  year         = {2025},
-  url          = {https://github.com/jweihe/RLHF-book-Chinese},
-  note         = {翻译自 Nathan Lambert 去作《Reinforcement Learning from Human Feedback》}
+@misc{rlhf_book_chinese,
+  author = {Lambert, Nathan},
+  title  = {RLHF 中文手册},
+  year   = {2025},
+  url    = {https://github.com/jweihe/RLHF-book-Chinese},
+  note   = {中文翻译维护：Junwei He；请同时注明所使用的 commit 或发布版本}
 }
 ```
 
----
-
-## 🛠️ 技术栈
-
-本项目基于 [Pandoc 书籍模板](https://github.com/wikiti/pandoc-book-template) 构建，使用以下工具：
-
-- **[Pandoc](https://pandoc.org/)** - 通用文档转换器
-- **[LaTeX](https://www.latex-project.org/)** - PDF 排版引擎
-- **[Make](https://www.gnu.org/software/make/)** - 构建自动化
-
----
-
-## 📄 许可证
-
-- **代码**：[MIT License](LICENSE-Code.md)
-- **内容**：[CC-BY-NC-SA 4.0](LICENSE-Content.md)
-
-> **注意**：本翻译版本仅用于技术传播目的，原内容版权归 Nathan Lambert 所有。使用本手册时请遵守相关许可协议。
-
----
-
-## 🤝 贡献
-
-欢迎贡献！如果你发现翻译错误或有改进建议：
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-**贡献类型：**
-- 🐛 Bug 修复
-- 📝 翻译改进
-- ✨ 新功能
-- 📚 文档完善
-- 🎨 样式优化
-
----
-
-## 📞 联系方式
-
-- **原作者**：[Nathan Lambert](https://github.com/natolambert)
-- **译者**：[Junwei He He](https://github.com/jweihe)
-- **问题反馈**：[提交 Issue](https://github.com/jweihe/RLHF-book-Chinese/issues)
-
----
-
-## 🙏 致谢
-
-感谢以下项目和社区的支持：
-
-- [Nathan Lambert](https://github.com/natolambert) 的原英文手册
-- [Pandoc](https://pandoc.org/) 团队提供的强大工具
-- 所有为本项目贡献建议和反馈的朋友
-
----
-
-## 📊 项目状态
-
-- ✅ 翻译完成
-- ✅ PDF 构建通过
-- ✅ 文档完善
-- 🔄 持续更新中
-
----
-
-<div align="center">
-
-**如果这个项目对你有帮助，请给个 ⭐ Star 支持一下！**
-
-[⬆ 返回顶部](#rlhf-中文手册)
-
-</div>
+内容与代码分别采用 [CC BY-NC-SA 4.0](LICENSE-Content.md) 与 [MIT](LICENSE-Code.md) 许可；原著、插图和引用材料保留原有署名及许可说明。
