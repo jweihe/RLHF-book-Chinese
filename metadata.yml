@@ -3,13 +3,13 @@ title: 基于人类反馈的强化学习
 subtitle: 面向语言模型的后训练RLHF简明指南
 biblio-title: 参考文献
 reference-section-title: 参考文献
-author: 作者：Nathan Lambert   译者：Junwei He & GPT4.1 
+author: 作者：Nathan Lambert   译者：Junwei He
 rights: CC-BY-NC-SA-4.0
 lang: zh-CN
 mainlang: english
 otherlang: english
 tags: [rlhf, ebook, ai, ml]
-date: 16 April 2025 
+date: 16 April 2025
 abstract: |
   基于人类反馈的强化学习（RLHF）已成为部署现代机器学习系统的重要技术手段与工具。
   本书旨在为具有定量分析背景的读者提供核心技术方法的入门指南。
@@ -18,26 +18,13 @@ abstract: |
   核心章节详细解析RLHF全流程优化阶段，涵盖指令调优、奖励模型训练，以及拒绝采样、强化学习和直接对齐算法等关键技术。
   最后探讨合成数据与评估等前沿研究课题，以及该领域的开放性科学问题。
   本项目地址 https://github.com/jweihe/RLHF-book-Chinese
-# mainfont: DejaVu Sans # not available on Mac
-Filter preferences:
-- pandoc-crossref
-geometry:
-  - margin=1.5in # Sets all margins (top, bottom, left, right) equally
+# Cross-reference labels (shared by HTML, EPUB and PDF)
 linkReferences: true
 link-citations: true
 numbersections: true
-# for better code processing
-listings: true
-# add pages in pdf between chapters
-header-includes:
-  - |
-    ```{=latex}
-    % Add new page before chapters start
-    \pretocmd{\section}{\newpage}{}{}  
-    % more stable tables in pdf
-    \usepackage{array}
-    \newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}}
-    ```
-##################
+figureTitle: 图
+tableTitle: 表
+figPrefix: 图
+tblPrefix: 表
+eqnPrefix: 式
 ---
-

@@ -28,27 +28,57 @@ jobs:
           tar -xJf crossref.tar.xz
           echo "$RUNNER_TEMP/book-tools/pandoc-3.11/bin" >> "$GITHUB_PATH"
           echo "$RUNNER_TEMP/book-tools" >> "$GITHUB_PATH"
+      - name: Install Tectonic 0.17.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/book-tools"
+          curl --fail --location --retry 3 https://github.com/tectonic-typesetting/tectonic/releases/download/tectonic%400.17.0/tectonic-0.17.0-x86_64-unknown-linux-gnu.tar.gz -o tectonic.tar.gz
+          echo '1a715688baf591e650c8aeb160ae934e181685eecbb38b317de30b269ac5d606  tectonic.tar.gz' | sha256sum -c -
+          tar -xzf tectonic.tar.gz tectonic
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/Tectonic
+          key: tectonic-0.17.0-v33-${{ runner.os }}
       - name: Build and check
         run: |
           pandoc --version
           pandoc-crossref --version
-          make -j4 html epub
+          make -j4 html epub pdf PDF_ENGINE=tectonic
           make check
+          python -m pip install pymupdf
+          python scripts/check_pdf.py build/pdf/book.pdf
+          cp build/pdf/book.pdf build/html/book.pdf
       - uses: actions/upload-artifact@v4
         with:
-          name: book-html-epub
+          name: book-html-epub-pdf
           path: |
             build/html/
             build/epub/
+            build/pdf/
           if-no-files-found: error
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese'
         with:
           path: build/html/
 
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install numerical example dependencies
+        run: |
+          python -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install numpy==2.2.6 jinja2==3.1.6
+      - name: Check the actual chapter snippets
+        run: python scripts/check_examples.py
+
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese'
-    needs: build
+    needs: [build, examples]
     runs-on: ubuntu-latest
     permissions:
       pages: write

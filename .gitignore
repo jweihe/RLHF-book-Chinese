@@ -14,3 +14,9 @@ build/latex.zip
 .vscode/
 __pycache__/
 *.pyc
+
+# Local document previews and delivery copies
+tmp/pdfs/
+output/pdf/
+
+.venv/

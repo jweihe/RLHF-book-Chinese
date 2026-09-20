@@ -166,7 +166,7 @@ Answer the above question and REMEMBER to finish your response with the exact ph
 ![Epoch AI报告：主流AI评测随时间迅速饱和。CC-BY许可。](images/benchmark-performance.jpeg)
 
 公司内部的大模型评测只能与同行横向对比（且误差很大），因为内部评测流程与外部评测不一致。
-内部评测本质上是“训练集”，用于爬坡调优；
+反复用于调参的内部评测实际上承担验证集的角色；仍应另设未用于调参的测试集。
 而社区用来比较领先模型的公开评测，无法确定是否被作为训练集、测试集或验证集。
 
 随着评测分数成为企业营销的核心，评测流程在公司内部不断变化。
@@ -178,7 +178,7 @@ Answer the above question and REMEMBER to finish your response with the exact ph
 公开的分数只是实验室模型的输出结果，输入细节并未全部披露。
 这些输入细节极为敏感，不同公司（OpenAI、Meta、Anthropic、Google）各不相同。
 即便是完全开源的评测标准，也很难保证可复现性。
-专注于自家模型，是实现可重复评测的唯一途径。
+固定模型版本、提示模板、采样参数、推理预算与评分代码，有助于提升可重复性；跨团队比较也需要披露这些条件。
 当然，技术团队的出发点是好的。
 
 如今，前沿大模型的评测既是科学，也是艺术。
@@ -188,7 +188,7 @@ Answer the above question and REMEMBER to finish your response with the exact ph
 用同分布prompt提升分数，与泛化到新任务是两回事。
 
 事实上，这些“训练集”本身就是高质量数据，模型训练时用它们会直接受益。
-如果企业*没有*把相关评测作为核心指标，直接用评测集训练也很合理——高质量数据才是模型开发的最大瓶颈。
+基准提供的训练划分可用于训练；若将测试划分也用于训练或调参，就不能再把该测试集上的成绩当作独立泛化证据，应披露用途并采用未污染的测试集。
 
 主流AI实验室往往在少数关键评测上爬坡，最后在核心公开集上报分。
 有些内部跟踪指标（如GPT-4报告中的交叉熵loss预测 [@achiam2023gpt]）甚至不对外公开。

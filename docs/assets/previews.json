@@ -1,0 +1,10 @@
+{
+  "pdf_sha256": "76f994ce981eaca8b0c35e02176a4a653df5ba0d9544d489c3314eb254d90638",
+  "page_count": 105,
+  "pages_one_based": {
+    "cover": 1,
+    "formulas": 65,
+    "code": 42,
+    "workflow": 20
+  }
+}
