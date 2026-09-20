@@ -51,7 +51,7 @@ macOS 可安装完整 MacTeX，并安装 Noto Serif CJK SC、Noto Sans CJK SC �
 
 GitHub Actions 在 PR 和主分支提交上构建 HTML/EPUB 并检查链接，产物保存在 workflow 的 artifact 中，GitHub 下载 artifact 通常需要登录。自动检查通过后仍需阅读者校对内容。
 
-Pages 部署与检查分开：维护者需要在仓库 Settings → Pages 选择 GitHub Actions，并设置仓库变量 `ENABLE_PAGES=true`。只有本仓库 `main` 分支的非 PR 运行会进入部署；未启用 Pages 时仍可正常检查和下载构建产物。确认实际部署地址可访问后再把它加入 README。
+Pages 部署与检查分开：维护者需要在仓库 Settings → Pages 选择 GitHub Actions。只有本仓库 `main` 分支的非 PR 运行会进入部署；PR 运行只检查和上传普通构建产物，不会部署；主分支部署需要先启用 Pages。确认实际部署地址可访问后再把它加入 README。
 
 ## 常见问题
 

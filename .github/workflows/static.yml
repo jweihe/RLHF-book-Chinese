@@ -42,12 +42,12 @@ jobs:
             build/epub/
           if-no-files-found: error
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese' && vars.ENABLE_PAGES == 'true'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese'
         with:
           path: build/html/
 
   deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese' && vars.ENABLE_PAGES == 'true'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese'
     needs: build
     runs-on: ubuntu-latest
     permissions:
