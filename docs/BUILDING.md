@@ -40,6 +40,8 @@ python3 -m http.server 8000 --directory build/html
 
 新版模板使用 `ctexbook`、Fandol 中文字体、TeX Gyre 西文字体、可换行代码块和中文图表编号。无需依赖操作系统中的 Noto 字体。
 
+PDF 每页带有淡色斜向 `jweihe` 水印（GitHub 用户名），封面使用适配深色背景的配色。水印定义在 `templates/pdf.tex`，本地 `make pdf`、导出的 LaTeX 和 GitHub Actions 自动编译均会保留；不需要下载后另行添加。
+
 Ubuntu 可安装 XeLaTeX 环境：
 
 ```bash
