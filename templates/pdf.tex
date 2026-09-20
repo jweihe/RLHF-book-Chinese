@@ -11,6 +11,18 @@
 \definecolor{muted}{HTML}{64748B}
 \definecolor{codebg}{HTML}{F3F5F7}
 \usepackage{graphicx}
+\usepackage{tikz}
+% Applied at shipout so every compiled page, including the cover, is branded.
+\newif\ifbookcover
+\bookcovertrue
+\AddToHook{shipout/foreground}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \ifbookcover\def\watermarkcolor{white}\def\watermarkopacity{0.12}%
+    \else\def\watermarkcolor{black}\def\watermarkopacity{0.08}\fi
+    \node[rotate=35,text=\watermarkcolor,text opacity=\watermarkopacity,
+      font=\sffamily\bfseries\fontsize{76}{76}\selectfont]
+      at (current page.center) {jweihe};
+  \end{tikzpicture}}
 \makeatletter
 \newsavebox\pandoc@box
 \newcommand*\pandocbounded[1]{%
@@ -111,6 +123,7 @@ $endif$
 \vspace{6mm}
 \url{https://github.com/jweihe/RLHF-book-Chinese}
 \end{titlepage}
+\bookcoverfalse
 \pagecolor{white}\color{black}
 \hypersetup{urlcolor=accent}
 \hypersetup{pageanchor=true}
