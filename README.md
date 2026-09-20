@@ -9,7 +9,7 @@
 
 本项目是 Nathan Lambert 开源书籍 [Reinforcement Learning from Human Feedback](https://github.com/natolambert/rlhf-book) 的中文翻译，包含 **19 章**，覆盖基础概念、训练方法、评测与开放问题。适合具有机器学习基础、希望理解大语言模型后训练的学生、工程师和研究者。
 
-**[下载 PDF](https://github.com/jweihe/RLHF-book-Chinese/raw/refs/heads/main/RLHF-book-Chinese.pdf) · [按章阅读](#章节导航) · [提 Issue](https://github.com/jweihe/RLHF-book-Chinese/issues/new/choose) · [Fork 项目](https://github.com/jweihe/RLHF-book-Chinese/fork) · [参与贡献](CONTRIBUTING.md)**
+**[在线阅读](https://jweihe.github.io/RLHF-book-Chinese/) · [下载 PDF](https://github.com/jweihe/RLHF-book-Chinese/raw/refs/heads/main/RLHF-book-Chinese.pdf) · [按章阅读](#章节导航) · [提 Issue](https://github.com/jweihe/RLHF-book-Chinese/issues/new/choose) · [Fork 项目](https://github.com/jweihe/RLHF-book-Chinese/fork) · [参与贡献](CONTRIBUTING.md)**
 
 > **版本说明：** 当前译本元数据标注为 **2025 年 4 月 16 日**，这不是已核实的上游 commit。尚未完成与英文出版版或原站最新版的逐章核对，因此不承诺内容完全一致。仓库 Markdown、预构建 PDF 与 Release 可能处于不同修订版本；阅读最新修订请以 `chapters/` 为准。详见 [版本与常见问题](docs/FAQ.md)。
 
@@ -25,6 +25,7 @@
 
 | 方式 | 入口与说明 |
 | --- | --- |
+| 在线阅读 | [中文阅读站](https://jweihe.github.io/RLHF-book-Chinese/)，含全书与 19 个独立章节页 |
 | PDF | [仓库 PDF](RLHF-book-Chinese.pdf)，适合离线阅读，可能落后于源文件 |
 | Markdown | 下方 19 章链接，适合阅读修订、检索和提交纠错；GitHub 不完整支持 Pandoc 引用语法 |
 | Release | [发布记录](https://github.com/jweihe/RLHF-book-Chinese/releases)；当前 `v1.0` 附件为 PDF |
@@ -85,7 +86,7 @@ make check             # 回归测试与 HTML 本地链接检查
 - [ ] 逐章记录对应的英文上游版本与差异。
 - [ ] 整理统一术语表与读者勘误。
 - [ ] 校验多格式产物后发布带版本记录的阅读包。
-- [ ] 完成部署验证后提供稳定的在线阅读入口。
+- [x] 提供 [GitHub Pages 在线阅读入口](https://jweihe.github.io/RLHF-book-Chinese/)，并在主分支检查通过后自动部署。
 
 这些是开放的贡献方向，不代表已经完成或承诺发布时间。欢迎先用 Issue 讨论范围。
 
