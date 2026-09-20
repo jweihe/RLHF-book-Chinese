@@ -1,78 +1,66 @@
-name: Deploy static content to Pages
+name: Build and validate book
 
 on:
   push:
-    branches: ["main"]
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install matching Pandoc and crossref versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/book-tools"
+          cd "$RUNNER_TEMP/book-tools"
+          curl --fail --location --retry 3 https://github.com/jgm/pandoc/releases/download/3.11/pandoc-3.11-linux-amd64.tar.gz -o pandoc.tar.gz
+          curl --fail --location --retry 3 https://github.com/lierdakil/pandoc-crossref/releases/download/v0.3.25a/pandoc-crossref-Linux-X64.tar.xz -o crossref.tar.xz
+          echo '37edb3bbcf722f921a009941bf5874e2e0c09263226c9b4a2d980788cb062ab6  pandoc.tar.gz' | sha256sum -c -
+          echo '7f8b7c5c91233db2dcb1145fa580a9ee8343695589bdb0ece8661490bc12a644  crossref.tar.xz' | sha256sum -c -
+          tar -xzf pandoc.tar.gz
+          tar -xJf crossref.tar.xz
+          echo "$RUNNER_TEMP/book-tools/pandoc-3.11/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/book-tools" >> "$GITHUB_PATH"
+      - name: Build and check
+        run: |
+          pandoc --version
+          pandoc-crossref --version
+          make -j4 html epub
+          make check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: book-html-epub
+          path: |
+            build/html/
+            build/epub/
+          if-no-files-found: error
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese' && vars.ENABLE_PAGES == 'true'
+        with:
+          path: build/html/
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main' && github.repository == 'jweihe/RLHF-book-Chinese' && vars.ENABLE_PAGES == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: macos-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install brew dependencies
-        run: |
-          brew update
-          brew install pandoc
-          brew install make
-          brew install pandoc-crossref
-          brew install --cask basictex
-          eval "$(/usr/libexec/path_helper)"
-          sudo tlmgr update --self
-          sudo tlmgr install xetex
-
-      - name: Set up LaTeX PATH
-        run: |
-          echo "/Library/TeX/texbin" >> $GITHUB_PATH
-          echo "PATH=$PATH:/Library/TeX/texbin" >> $GITHUB_ENV
-
-
-
-      # - name: Setup Pandoc
-      #   uses: pandoc/actions/setup@main
-        # with:
-        #   version: 2.19  # Uncomment and modify if you need a specific version
-
-      - name: Clean build directory
-        run: |
-          rm -rf build
-          mkdir -p build/html
-
-      - name: Build book
-        run: |
-          make
-          make files
-
-      # Need this if main domain is www.rlhfbook.com
-      # For now, it is rlhfbook.com, and seems to be working.
-      # - name: Create CNAME file
-      #   run: |
-      #     echo "www.rlhfbook.com" > build/html/CNAME
-
-      # pages deploy steps
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'build/html/'
-
-      - name: Deploy to GitHub Pages
+      - uses: actions/configure-pages@v5
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-

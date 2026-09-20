@@ -1,0 +1,25 @@
+name: 构建或阅读问题
+description: 报告构建失败、图片缺失、导航或公式显示异常
+title: "[构建/阅读] "
+body:
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境与版本
+      description: 操作系统、Pandoc/crossref 版本，或浏览器/阅读器与书籍版本。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤与预期结果
+      description: 提供命令、章节链接或操作步骤。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 实际结果与日志
+      description: 粘贴相关错误日志；请先移除密钥、令牌等私人信息。
+    validations:
+      required: true

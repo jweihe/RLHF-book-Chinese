@@ -5,7 +5,7 @@ biblio-title: 参考文献
 reference-section-title: 参考文献
 author: 作者：Nathan Lambert   译者：Junwei He & GPT4.1 
 rights: CC-BY-NC-SA-4.0
-lang: en-US
+lang: zh-CN
 mainlang: english
 otherlang: english
 tags: [rlhf, ebook, ai, ml]
@@ -17,7 +17,7 @@ abstract: |
   通过明确定义、问题建模、数据收集和通用数学工具，构建完整知识框架。
   核心章节详细解析RLHF全流程优化阶段，涵盖指令调优、奖励模型训练，以及拒绝采样、强化学习和直接对齐算法等关键技术。
   最后探讨合成数据与评估等前沿研究课题，以及该领域的开放性科学问题。
-  本项目地址 https://github.com/jweihe
+  本项目地址 https://github.com/jweihe/RLHF-book-Chinese
 # mainfont: DejaVu Sans # not available on Mac
 Filter preferences:
 - pandoc-crossref

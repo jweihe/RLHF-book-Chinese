@@ -7,14 +7,13 @@
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 
   <!-- Add Open Graph meta tags for share image -->
-  <meta property="og:image" content="https://github.com/natolambert/rlhf-book/blob/main/images/rlhf-book-share" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/jweihe/RLHF-book-Chinese/main/images/rlhf-book-share.png" />
   <meta property="og:image:width" content="1920" />
   <meta property="og:image:height" content="1080" />
   
   <!-- <meta property="og:title" content="$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$" /> -->
-  <meta property="og:title" content="$if(page-title)$$page-title$$else$$title$$endif$ | RLHF Book by Nathan Lambert" />
-  <meta property="og:description" content="The Reinforcement Learning from Human Feedback Book" />
-  <meta property="og:url" content="https://rlhfbook.com" />
+  <meta property="og:title" content="$if(page-title)$$page-title$$else$$title$$endif$ | RLHF 中文手册" />
+  <meta property="og:description" content="Nathan Lambert 开源 RLHF Book 中文翻译：指令微调、奖励建模、PPO、DPO、AI 反馈与评测。" />
 
   $for(author-meta)$
   <meta name="author" content="$author-meta$" />
@@ -29,9 +28,9 @@ $endif$
    <!-- SEO and Open Graph titles -->
    <title>
     $if(page-title)$
-      $page-title$ | RLHF Book by Nathan Lambert
+      $page-title$ | RLHF 中文手册
     $else$
-      $title$ | RLHF Book by Nathan Lambert
+      $title$ | RLHF 中文手册
     $endif$
   </title>
   
@@ -82,7 +81,7 @@ $endfor$
 
 </header>
 $endif$
-<div> <h3> Chapter Contents </h3> </div>
+<div> <h3> 本章目录 </h3> </div>
 $if(toc)$
 <nav id="$idprefix$TOC" role="doc-toc">
 $if(toc-title)$
@@ -98,7 +97,7 @@ $endif$
 <div id="chapter-navigation" style="display: flex; justify-content: space-between; padding: 2em 0;">
   $if(prev-url)$
   <a href="$prev-url$" class="prev-chapter">
-    ← Previous: $prev-chapter$
+    ← 上一章： $prev-chapter$
   </a>
   $else$
   <div></div>
@@ -106,7 +105,7 @@ $endif$
   
   $if(next-url)$
   <a href="$next-url$" class="next-chapter">
-    Next: $next-chapter$ →
+    下一章： $next-chapter$ →
   </a>
   $endif$
 </div>

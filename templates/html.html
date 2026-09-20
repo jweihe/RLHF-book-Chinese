@@ -7,14 +7,13 @@
   <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 
   <!-- Add Open Graph meta tags for share image -->
-  <meta property="og:image" content="https://github.com/natolambert/rlhf-book/blob/main/images/rlhf-book-share" />
+  <meta property="og:image" content="https://raw.githubusercontent.com/jweihe/RLHF-book-Chinese/main/images/rlhf-book-share.png" />
   <meta property="og:image:width" content="1920" />
   <meta property="og:image:height" content="1080" />
 
   <!-- <meta property="og:title" content="$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$" /> -->
-  <meta property="og:title" content="RLHF Book by Nathan Lambert" />
-  <meta property="og:description" content="The Reinforcement Learning from Human Feedback Book" />
-  <meta property="og:url" content="https://rlhfbook.com" />
+  <meta property="og:title" content="RLHF 中文手册" />
+  <meta property="og:description" content="Nathan Lambert 开源 RLHF Book 中文翻译：指令微调、奖励建模、PPO、DPO、AI 反馈与评测。" />
 
   $for(author-meta)$
   <meta name="author" content="$author-meta$" />
@@ -28,7 +27,7 @@ $endif$
   <!-- <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title> -->
    <!-- SEO and Open Graph titles -->
   <title>
-    RLHF Book by Nathan Lambert
+    RLHF 中文手册
   </title>
 
   <style>
@@ -58,6 +57,7 @@ $endfor$
 
 <!-- custom js nav -->
 <script src="nav.js" defer></script>
+<script src="header-anchors.js" defer></script>
 
 </head>
 <body>
@@ -77,15 +77,17 @@ $endfor$
 
 $if(abstract)$
 <div class="abstract">
-  <h2>Abstract</h2>
+  <h2>简介</h2>
   $abstract$
 </div>
 $endif$
 </header>
 $endif$
-<body>
+<main id="content">
+$body$
+</main>
   <section id="changelog" style="padding: 20px; text-align: center;">
-    <h2>Changelog</h2>
+    <h2>原书早期更新记录（2025）</h2>
     <p><strong>14 Apr. - 16 Apr. 2025 </strong>: Finish v0. Overoptimization, open questions, etc. </p>
     <p><strong>6 Apr. - 12 Apr. 2025.</strong>: Evaluation section </p>
     <p><strong>28 Mar. - 5 Apr. 2025.</strong>: Research on RLHF x Product, cleaning, improving website, reasoning section </p>

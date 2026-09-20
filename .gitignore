@@ -12,3 +12,5 @@ build/latex.zip
 .DS_Store
 **/.DS_Store
 .vscode/
+__pycache__/
+*.pyc

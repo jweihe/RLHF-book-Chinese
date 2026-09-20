@@ -15,11 +15,13 @@ document.addEventListener('DOMContentLoaded', function() {
     anchor.classList.add('header-anchor');
     anchor.href = '#' + heading.id;
     anchor.textContent = '🔗';
-    anchor.title = 'Copy link to this section';
+    anchor.title = '复制本节链接';
+    anchor.setAttribute('aria-label', '复制本节链接');
     
     // Add click handler to copy the URL
     anchor.addEventListener('click', function(e) {
-      e.preventDefault();
+      // Keep native anchor navigation, including when clipboard access is unavailable.
+      if (!navigator.clipboard || !navigator.clipboard.writeText) return;
       
       // Create the full URL with fragment
       const url = window.location.href.split('#')[0] + '#' + heading.id;
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
       navigator.clipboard.writeText(url).then(function() {
         // Visual feedback that link was copied
         const originalTitle = anchor.title;
-        anchor.title = 'Link copied to clipboard!';
+        anchor.title = '链接已复制';
         
         // Reset title after a delay
         setTimeout(function() {
