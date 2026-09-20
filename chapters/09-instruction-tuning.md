@@ -6,7 +6,7 @@ next-chapter: "拒绝采样"
 next-url: "10-rejection-sampling.html"
 ---
 
-# 指令微调（Instruction Finetuning）
+# 指令微调
 
 早期的语言模型仅被训练用于预测序列中的下一个token，并未针对具体任务进行适配。
 大约在GPT-3发布 [@brown2020language] 时，语言模型主要通过“上下文学习”（in-context learning）使用，即给模型展示一些示例，然后让其完成类似任务。
@@ -15,7 +15,7 @@ next-url: "10-rejection-sampling.html"
 而随着模型规模增大，多个研究结果显示，标准化任务数据的处理方式可以极大提升下游表现。
 统一任务框架的代表性工作包括 T5 模型（*Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer*）[@raffel2020exploring]、FLAN数据集（*Finetuned Language Models Are Zero-Shot Learners*）[@wei2021finetuned]、T0模型（*Multitask Prompted Training Enables Zero-Shot Task Generalization*）[@sanh2021multitask]、Natural Instructions数据集（*Cross-Task Generalization via Natural Language Crowdsourcing Instructions*）[@mishra2021cross] 等。
 这些洞见推动了“微调”语言模型的时代到来。
-在RLHF及相关方法出现之前，所有微调几乎都是**指令微调**（Instruction Finetuning, IFT），也称为**有监督微调**（Supervised Finetuning）。
+**指令微调**（Instruction Finetuning, IFT）是有监督微调（Supervised Finetuning, SFT）的一种应用，使用指令与示范回答训练模型。更早的任务分类、抽取等有监督微调并不都属于指令微调。
 
 如今，指令微调（Instruction Tuning）已非常成熟，成为众多语言建模流程中的标准步骤。
 本质上，IFT是将语言模型适配到特定任务的最简单方法。
@@ -31,25 +31,24 @@ RLHF流程中的核心环节之一，是将用户请求格式化为tokenizer和�
 下面是一个聊天模板的代码示例，我们将逐步解析：
 
 ```jinja
-{% if messages[0]['role'] == 'system' %}
-    {% set offset = 1 %}
-{% else %}
-    {% set offset = 0 %}
-{% endif %}
-
+{% set offset = 1 if messages and messages[0]['role'] == 'system' else 0 %}
 {{ bos_token }}
 {% for message in messages %}
-    {% if (message['role'] == 'user') != (loop.index0 % 2 == offset) %}
-        {{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}
+    {% if not (loop.index0 == 0 and offset == 1) %}
+        {% set expected = 'user' if (loop.index0 - offset) % 2 == 0 else 'assistant' %}
+        {% if message['role'] != expected %}
+            {{ raise_exception('Expected alternating user/assistant roles') }}
+        {% endif %}
     {% endif %}
-
-    {{ '<|im_start|>' + message['role'] + '\n' + message['content'] | trim + '<|im_end|>\n' }}
+    {{ '<|im_start|>' + message['role'] + '\n' + (message['content'] | trim) + '<|im_end|>\n' }}
 {% endfor %}
-
 {% if add_generation_prompt %}
     {{ '<|im_start|>assistant\n' }}
 {% endif %}
 ```
+
+这是仅演示可选首条 system 与交替 user/assistant 的简化模板；实际训练应使用模型随附的模板。工具消息、多模态输入和模板自身的空白控制不在此例范围内。
+
 这段代码会把Python中包含消息和角色的字典列表，转换为语言模型可预测的token序列。
 
 所有输入模型的信息都会被赋予一个角色（role）。
@@ -126,9 +125,9 @@ ChatGPT发布后不久，仅1万条样本（如No Robots数据集）的人类数
 
 一些通用原则包括：
 
-* 高质量数据是性能提升的关键。模型真正学到的是“补全内容”，而非prompt（很多情况下prompt不参与预测）。
-* 约100万条prompt即可训练出优秀的RLHF和后训练模型。继续扩展数据规模虽有提升，但收益递减明显。
+* 高质量数据是性能提升的关键。即使 prompt 不直接参与损失计算，它仍作为上下文影响回答预测与梯度。
+* 数据规模应结合模型、任务覆盖与质量评估；约百万条数据是一些工作的经验量级，并不是获得优秀模型的充分条件。
 * 最佳prompt应与下游任务分布相似。
 * 若指令微调后还有多阶段训练，模型可一定程度上修复流程中的噪声，整体优化优先于单阶段最优。
 * 指令微调（及后训练、直接对齐算法等）中，通常会对prompt部分做mask，仅对补全token计算损失。
-* 多轮训练样本同理——只对“最后一轮”生成部分计损失，前面assistant的回复可作为prompt但被mask。
+* 多轮训练可对所有 assistant 回复计损失，也可只监督最后一轮；应明确数据与框架采用哪种掩码策略，并通常排除 system、user 和 padding。

@@ -20,7 +20,7 @@ METADATA_ARGS = --metadata-file $(METADATA)
 IMAGES = $(shell find images -type f)
 TEMPLATES = $(shell find templates/ -type f)
 COVER_IMAGE = images/cover.png
-MATH_FORMULAS = --mathjax # --webtex, is default for PDF/ebook. Consider resetting if issues.
+MATH_FORMULAS = --math-method=mathjax
 BIBLIOGRAPHY = --bibliography=chapters/bib.bib --citeproc --csl=templates/ieee.csl
 
 # Chapters content
@@ -46,9 +46,9 @@ PANDOC_COMMAND = pandoc
 
 DOCX_ARGS = --standalone --reference-doc templates/docx.docx
 EPUB_ARGS = --template templates/epub.html --epub-cover-image $(COVER_IMAGE) --mathml
-HTML_ARGS = --template templates/html.html --standalone --to html5 --listings
-# PDF_ARGS = --template templates/pdf.tex --pdf-engine xelatex --listings 
-PDF_ARGS = --template templates/pdf.tex --pdf-engine xelatex --listings --variable mainfont="Noto Serif CJK SC" --variable sansfont="Noto Sans CJK SC" --variable monofont="Noto Sans Mono CJK SC"  # 等宽中文字体
+HTML_ARGS = --template templates/html.html --standalone --to html5
+PDF_ENGINE ?= xelatex
+PDF_ARGS = --template templates/pdf.tex --pdf-engine $(PDF_ENGINE) --top-level-division=chapter --syntax-highlighting=tango
 
 NESTED_HTML_TEMPLATE = templates/chapter.html
 
@@ -116,7 +116,7 @@ html_assets:
 
 $(NESTED_HTML_DIR)/%.html: chapters/%.md $(HTML_DEPENDENCIES)
 	mkdir -p $(NESTED_HTML_DIR)
-	$(PANDOC_COMMAND) $(ARGS) --template $(NESTED_HTML_TEMPLATE) --standalone --to html5 -o $@ $< --mathjax
+	$(PANDOC_COMMAND) $(ARGS) --template $(NESTED_HTML_TEMPLATE) --standalone --to html5 -o $@ $<
 
 nested_html: $(CHAPTER_HTMLS) html_assets
 
@@ -128,50 +128,11 @@ check:
 	python3 -m unittest discover -s tests
 	python3 scripts/check_html.py $(BUILD)/html
 
-# ArXiv‑compatible LaTeX build rule
+# Portable LaTeX source package; compile from inside build/latex.
 $(BUILD)/latex/$(OUTPUT_FILENAME).tex: $(PDF_DEPENDENCIES)
-	$(ECHO_BUILDING)
-	$(MKDIR_CMD) -p $(BUILD)/latex
-
-	# 1. Generate the LaTeX file with Pandoc (tell Pandoc where to find images)
-	$(CONTENT) \
-	  | $(CONTENT_FILTERS) \
-	  | $(PANDOC_COMMAND) $(ARGS) $(PDF_ARGS) --resource-path=. -o $@
-
-	# 2. Flatten image paths — copy every referenced image into the build dir root
-	$(foreach img,$(IMAGES), cp $(img) $(BUILD)/latex/$(notdir $(img));)
-
-	# 3a. Strip directory prefixes in \includegraphics paths
-	sed -E -i.bak 's|(\\includegraphics(\[[^]]*\])?\{)[^/}]+/|\1|g' $@
-
-	# 3b. Restore missing \includegraphics inside \pandocbounded{}
-	perl -CSD -pi -e 's/\\pandocbounded\{([^{}]+)\}\}/\\pandocbounded{\\includegraphics{$$1}}/g' $@
-
-	# 3c. Unicode → ASCII/TeX normalisation (one perl pass per rule for clarity)
-	perl -CSD -pi -e 's/\x{2060}//g;'                                        $@  # WORD JOINER
-	perl -CSD -pi -e 's/\x{03C4}/\\tau/g;'                                  $@  # τ
-	perl -CSD -pi -e 's/[\x{2018}\x{2019}]/\x27/g;'                       $@  # curly apostrophes
-	perl -CSD -pi -e 's/[\x{201C}\x{201D}]/\x22/g;'                       $@  # curly quotes
-	perl -CSD -pi -e 's/\x{2026}/.../g;'                                    $@  # ellipsis
-	perl -CSD -pi -e 's/\x{00A9}/\\textcopyright{}/g;'                    $@  # © symbol
-
-	# 4. Copy bibliography and CSL files required by arXiv
-	cp chapters/bib.bib    $(BUILD)/latex/
-	cp templates/ieee.csl  $(BUILD)/latex/
-
-	# 5. Warn (but don\'t fail) if any non‑ASCII bytes remain
-	@REM_BYTES=$$(grep -nP "[\x80-\xFF]" $@ || true); \
-	if [ -n "$$REM_BYTES" ]; then \
-	  echo "[WARN] Non‑ASCII bytes still present in $@:"; \
-	  echo "$$REM_BYTES" | head; \
-	else \
-	  echo "[INFO] All bytes ASCII‑safe after post‑processing."; \
-	fi
-
-	$(ECHO_BUILT)
-
-
-
+	$(MKDIR_CMD) $(BUILD)/latex/images
+	$(CONTENT) | $(PANDOC_COMMAND) $(ARGS) $(PDF_ARGS) -o $@
+	cp -R images/. $(BUILD)/latex/images/
 
 $(BUILD)/pdf/$(OUTPUT_FILENAME).pdf:	$(PDF_DEPENDENCIES)
 	$(ECHO_BUILDING)

@@ -8,7 +8,7 @@ next-url: "09-instruction-tuning.html"
 
 # 正则化
 
-在RLHF优化过程中，通常需要引入多种正则化手段，以防止奖励模型出现过度优化（over-optimization）的现象。
+在RLHF优化过程中，通常需要引入多种正则化手段，以防止策略对奖励模型给出的分数过度优化（over-optimization）的现象。
 在实际中，过度优化常表现为模型输出无意义的文本，例如：推理过程看似合理但答案极其错误、文本重复、频繁切换语言、或出现大量特殊字符等。
 
 目前最常见的正则化方式，是对生成样本的当前策略与参考策略之间施加KL距离惩罚，这一方法被广泛应用于主流RLHF实现中。
@@ -23,12 +23,12 @@ $$ r = r_\theta - \lambda r_{\text{reg.}} $$ {#eq:rl_start}
 最常见的实现是：
 
 $$
-r = r_\theta - \lambda_{\text{KL}} \mathcal{D}_{\text{KL}} \left( \pi^{\text{RL}}(y \mid x) \, \| \, \pi^{\text{Ref.}}(y \mid x) \right)
+r = r_\theta - \lambda_{\text{KL}} \mathcal{D}_{\text{KL}} \left( \pi^{\text{RL}}(\cdot \mid x) \, \| \, \pi^{\text{Ref.}}(\cdot \mid x) \right)
 $$ {#eq:kl_standard}
 
 ## RL优化中的KL距离
 
-关于数学定义，见第5章“问题设定与背景”。
+关于数学定义，见第3章“定义与背景”。
 回顾KL距离的定义：
 
 $$ D_{KL}(P || Q) = \sum_{x \in \mathcal{X}} P(x) \log \left(\frac{P(x)}{Q(x)}\right) $$ {#eq:kl_distance_regularization}
@@ -57,31 +57,31 @@ $$ {#eq:kl_expectation}
 这种方式尤其适合直接用语言模型训练中常用的log概率实现。
 
 ```python
-# 步骤1：从策略采样（或生成）序列
-generated_tokens = model.generate(inputs)
+import torch.nn.functional as F
 
-# 步骤2：在两个模型下对生成序列评分
-#    对于自回归语言模型，通常这样处理：
-#      inputs_for_scoring = generated_tokens[:, :-1]
-#      labels           = generated_tokens[:, 1:]
-logits       = model.forward(generated_tokens[:, :-1]).logits
-ref_logits   = ref_model.forward(generated_tokens[:, :-1]).logits
+# logits/ref_logits: [B, L, V]，已与下一个 token 的标签对齐
+# labels: [B, L]；completion_mask: [B, L]
+# mask 仅包含回答 token（可包含 EOS），排除 prompt 和 padding
+logprobs = F.log_softmax(logits, dim=-1)
+ref_logprobs = F.log_softmax(ref_logits.detach(), dim=-1)
+mask = completion_mask.to(logprobs.dtype)
 
-# 转换为log概率，并对齐标签以索引logits
-logprobs     = F.log_softmax(logits, dim=-1)
-ref_logprobs = F.log_softmax(ref_logits, dim=-1)
+token_logps = logprobs.gather(-1, labels.unsqueeze(-1)).squeeze(-1)
+ref_token_logps = ref_logprobs.gather(-1, labels.unsqueeze(-1)).squeeze(-1)
+# 每条回答的采样 log 比率，再对 batch 取平均
+sampled_kl = ((token_logps - ref_token_logps) * mask).sum(-1).mean()
 
-# 获取实际下一个token的log概率
-token_logprobs     = logprobs.gather(-1, generated_tokens[:, 1:].unsqueeze(-1)).squeeze(-1)
-ref_token_logprobs = ref_logprobs.gather(-1, generated_tokens[:, 1:].unsqueeze(-1)).squeeze(-1)
-
-# 累加（或平均）得到序列log概率，再计算KL：
-seq_logprob     = token_logprobs.sum(dim=-1)
-ref_seq_logprob = ref_token_logprobs.sum(dim=-1)
-
-kl_approx = seq_logprob - ref_seq_logprob
-kl_full   = F.kl_div(ref_logprobs, logprobs, reduction='batchmean')
+# 在已采样前缀上，对整个词表精确求 KL(policy || reference)
+# kl_div 的 input 为 reference log 概率，target 为 policy log 概率
+# target 已取 log，必须设置 log_target=True
+per_token_kl = F.kl_div(
+    ref_logprobs, logprobs, log_target=True, reduction="none"
+).sum(-1)
+conditional_kl = (per_token_kl * mask).sum(-1).mean()
 ```
+
+单个样本的 log 比率可能为负，只有按当前策略采样取期望后才等于非负的 KL 散度。第二种写法对词表求和，但前缀仍来自采样，并未枚举全部序列。若样本来自旧策略，应考虑分布差异；以上是数值估计示例，不能直接把 `sampled_kl.backward()` 当作完整的 KL 正则化梯度。训练时还需区分奖励塑形、停止梯度与显式 KL 损失。
+
 
 典型实现可参考 [TRL](https://github.com/huggingface/trl/blob/5c21de30ae210e4251ead85517ba8dfe3f210e81/trl/trainer/ppo_trainer.py#L1150) 和 [Hamish Ivison的Jax代码](https://github.com/hamishivi/EasyLM/blob/main/EasyLM/models/llama/llama_train_ppo.py#L278)。
 
@@ -95,7 +95,7 @@ $$
 \text{objective} (\theta) = \mathbb{E}_{(x,y) \sim \mathcal{D}_{\pi^{\text{RL}}_{\theta}}} \left[ r_{\theta}(x, y) - \lambda r_{\text{reg.}} \right]
 $$ {#eq:objective_regularization}
 
-然后，可以为预训练准确率增加额外奖励项：
+然后，可加入预训练数据上的 log 似然项以保持语言建模能力（这里的 $\gamma$ 为混合系数，不是 RL 折扣因子）：
 
 $$
 \text{objective} (\theta) = \mathbb{E}_{(x,y) \sim \mathcal{D}_{\pi^{\text{RL}}_{\theta}}} \left[ r_{\theta}(x, y) - \lambda r_{\text{reg.}} \right] + \gamma \mathbb{E}_{x \sim \mathcal{D}_{\text{pretrain}}} \left[ \log(\pi^{\text{RL}}_{\theta}(x)) \right]
@@ -110,7 +110,12 @@ $$\mathcal{L}_{\text{DPO+NLL}} = \mathcal{L}_{\text{DPO}}(c_i^w, y_i^w, c_i^l, y
 $$ {#eq:dpo_nll}
 
 $$
-= -\log \sigma \left( \beta \log \frac{M_\theta(c_i^w, y_i^w \mid x_i)}{M_t(c_i^w, y_i^w \mid x_i)} - \beta \log \frac{M_\theta(c_i^l, y_i^l \mid x_i)}{M_t(c_i^l, y_i^l \mid x_i)} \right) - \alpha \frac{\log M_\theta(c_i^w, y_i^w \mid x_i)}{|c_i^w| + |y_i^w|}.
+\begin{aligned}
+\mathcal{L}_{\mathrm{DPO+NLL}}
+={}&-\log\sigma\Bigg(\beta\log\frac{M_\theta(c_i^w,y_i^w|x_i)}{M_t(c_i^w,y_i^w|x_i)}\\
+&\qquad-\beta\log\frac{M_\theta(c_i^l,y_i^l|x_i)}{M_t(c_i^l,y_i^l|x_i)}\Bigg)\\
+&-\alpha\frac{\log M_\theta(c_i^w,y_i^w|x_i)}{|c_i^w|+|y_i^w|}.
+\end{aligned}
 $$ {#eq:dpo_nll_expanded}
 
 ## 其他正则化方法
@@ -125,7 +130,7 @@ $$
 \mathcal{L}(\theta) = - \left[ \log \left( \sigma \left( r_{\theta}(x, y_w) - r_{\theta}(x, y_l) - m(r) \right) \right) \right]
 $$ {#eq:margin_loss}
 
-其中$m(r)$为两位标注员打分的数值差异。
+其中 $m(r)$ 是根据同一对回答的偏好强度标签设定的间隔，不是两位标注员之间的分歧。
 这可以通过让标注员用数值量表（如Likert量表）对输出评分，或用定量排序方法实现。
 
 奖励margin在直接对齐相关文献中被大量使用，如Reward weighted DPO、“Reward-aware Preference Optimization”（RPO，奖励感知偏好优化），即在DPO损失基础上将奖励模型分数纳入更新规则 [@adler2024nemotron]，或REBEL [@gao2024rebel]，采用奖励差异加权的回归损失等。

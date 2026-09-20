@@ -6,11 +6,11 @@ next-chapter: "宪法AI"
 next-url: "13-cai.html"
 ---
 
-# 直接对齐算法（Direct Alignment Algorithms, DAAs）
+# 直接对齐算法
 
 直接对齐算法（Direct Alignment Algorithms, DAAs）允许我们在无需训练奖励模型或使用强化学习优化器的情况下，直接优化RLHF目标。
 其中最具代表性、并掀起学术界大规模关注的，是直接偏好优化（Direct Preference Optimization, DPO）[@rafailov2024direct]。
-DPO的本质是用梯度上升直接求解带约束的RLHF目标。
+DPO 将 KL 正则化奖励最大化问题中的最优策略关系代入偏好模型，得到可直接训练策略的分类损失。实际训练最小化偏好损失，并不保证有限数据和有限优化步骤下达到原目标的全局最优。
 自2023年5月发布以来，经过社区对数据和超参数（尤其是意外地低学习率）的探索，DPO及其变体被广泛应用于主流模型，如Zephyr-$\beta$（2023年10月）[@tunstall2023zephyr]、Llama 3 Instruct [@dubey2024llama]、Tülu 2 [@ivison2023camels]、Tülu 3 [@lambert2024t]、Nemotron 4 340B [@adler2024nemotron]等。
 严格来说，Sequence Likelihood Calibration（SLiC-HF）[@zhao2023slic]更早提出，但因有效性和运气等原因未被广泛采用。
 
@@ -26,14 +26,21 @@ DPO表面上是直接优化策略以求解RLHF目标。
 其损失函数本质上是log概率的成对关系。
 Bradley-Terry奖励模型推导出的损失函数如下：
 
-$$ \mathcal{L}_{\text{DPO}}(\pi_\theta; \pi_{\text{ref}}) = -\mathbb{E}_{(x, y_c, y_r) \sim \mathcal{D}}\left[ \log \sigma\left( \beta \log \frac{\pi_{\theta}(y_c \mid x)}{\pi_{\text{ref}}(y_c \mid x)} - \beta \log \frac{\pi_{\theta}(y_r \mid x)}{\pi_{\text{ref}}(y_r \mid x)} \right) \right] $$ {#eq:dpo_core}
+$$
+\begin{aligned}
+h_\theta(x,y_c,y_r)&=\log\frac{\pi_\theta(y_c|x)}{\pi_{\mathrm{ref}}(y_c|x)}
+-\log\frac{\pi_\theta(y_r|x)}{\pi_{\mathrm{ref}}(y_r|x)},\\
+\mathcal{L}_{\mathrm{DPO}}&=-\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}
+\big[\log\sigma(\beta h_\theta(x,y_c,y_r))\big].
+\end{aligned}
+$$ {#eq:dpo_core}
 
 这里用到DPO的隐式奖励：
 
-$$r(x, y) = \beta  \log \frac{\pi_r(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$$ {#eq:dpo_reward}
+$$r(x, y) = \beta  \log \frac{\pi_\theta(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$$ {#eq:dpo_reward}
 
 这个奖励来自Bradley-Terry模型下的最优策略推导（见[@eq:dpo_opt_policy]）。
-本质上，DPO的隐式奖励模型用“最优策略下人类偏好数据的概率”替代了外部奖励模型。
+这是用策略与参考策略的 log 概率比参数化的隐式奖励，不是一个概率。完整奖励还可包含仅依赖 prompt 的加法项 $\beta\log Z(x)$；该项在成对奖励差中抵消。
 
 观察[@eq:dpo_core]中的损失，优化目标是让选中回复的log比率大于被拒回复（归一化参考模型）。
 实际中，这就是对模型在数据中token序列的log概率求和。
@@ -41,7 +48,13 @@ $$r(x, y) = \beta  \log \frac{\pi_r(y \mid x)}{\pi_{\text{ref}}(y \mid x)}$$ {#e
 
 有了[@eq:dpo_reward]中的奖励，我们可以写出损失的梯度，进一步理解机制：
 
-$$\nabla_{\theta}\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) = -\beta \mathbb{E}_{(x, y_c, y_r)\sim \mathcal{D}}\left[ \sigma\left(r_{\theta}(x, y_r) - r_{\theta}(x, y_c)\right) \left(\nabla_{\theta}\log \pi(y_c \mid x) - \nabla_{\theta}\log \pi(y_r \mid x)\right) \right] $$ {#eq:dpo_gradient}
+$$
+\begin{aligned}
+\nabla_\theta\mathcal{L}_{\mathrm{DPO}}
+=-\beta\mathbb{E}_{\mathcal{D}}\Big[&\sigma(r_\theta(x,y_r)-r_\theta(x,y_c))\\
+&\cdot\big(\nabla_\theta\log\pi_\theta(y_c|x)-\nabla_\theta\log\pi_\theta(y_r|x)\big)\Big].
+\end{aligned}
+$$ {#eq:dpo_gradient}
 
 直观理解如下：
 
@@ -50,59 +63,55 @@ $$\nabla_{\theta}\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) = -\be
 - $\beta$控制优化中排序与KL距离的平衡。
 
 核心直觉是，DPO“隐式拟合了一个奖励模型，其对应最优策略可解析写出”（归功于梯度上升和ML工具）。
-很多人误以为DPO直接训练策略，其实本质上还是在学习一个奖励模型，这也是论文副标题“Your Language Model is Secretly a Reward Model”的由来。
+DPO 确实直接更新策略参数；同一个语言模型同时给出了隐式奖励的参数化，而不是先独立训练奖励模型再用 RL 优化策略。
 
-通过隐式奖励建模，DPO针对数据和KL约束$\beta$，给出RLHF目标的最优解。
+在 Bradley-Terry 偏好假设、足够的模型表达能力与充分优化等条件下，可以通过这一参数化联系偏好拟合与 KL 正则化目标的最优策略。经验训练效果仍受数据覆盖、模型容量和优化过程限制。
 与策略梯度类RL方法的区别在于，DPO的生成不是在线的，而是离线的，因此$\beta$更易调节，但最优值依赖于具体模型与数据。
 
-每批偏好数据（即大量$y_{chosen} \succ y_{rejected}$对）下，DPO直接向最优解做梯度步，比策略梯度方法要简单得多。
+对每批偏好数据，DPO 直接计算离线偏好损失并更新策略，省去了训练循环中的在线 rollout 和显式价值估计。
 
 ![DPO简洁性梗图，致谢Tom Goldstein。](images/dpo_meme.jpeg){#fig:dpo-meme}
 
 ### DPO公式推导
 
-DPO推导分两步：  
-1. 推导RLHF目标的最优策略形式；  
+DPO推导分两步：
+1. 推导RLHF目标的最优策略形式；
 2. 用Bradley-Terry模型推导如何从偏好数据获得该解。
 
 #### 1. RLHF最优解推导
 
-RLHF优化目标：
+对固定奖励函数 $r$、$\beta>0$ 和参考策略，在其支持集上考虑：
 
-$$ \max_{\pi} \mathbb{E}_{\tau \sim \pi} \left[r_\theta(s_t, a_t)\right] - \beta  \mathcal{D}_{KL}(\pi^{\text{RL}}(\cdot|s_t) \| \pi^{\text{ref}}(\cdot|s_t)).$$ {#eq:rlhf_opt_eq_repeat}
+$$
+\begin{aligned}
+\pi^* &= \arg\max_\pi J(\pi),\\
+J(\pi) &= \mathbb{E}_{x\sim\mathcal{D}}\left[
+\mathbb{E}_{y\sim\pi(\cdot|x)}r(x,y)
+-\beta D_{\mathrm{KL}}(\pi(\cdot|x)\|\pi_{\mathrm{ref}}(\cdot|x))\right].
+\end{aligned}
+$$ {#eq:rlhf_opt_eq_repeat}
 
-展开KL散度：
+展开 KL，并将目标乘以负数 $-1/\beta$，最大化转为最小化。这里相等的是最优策略集合，不是目标函数的数值：
 
-$$\max_{\pi} \mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}\left[r(x,y)-\beta\log\frac{\pi(y|x)}{\pi_{\text{ref}}(y|x)}\right] $$ {#eq:dpo_deriv_1}
+$$
+\pi^*=\arg\min_\pi\mathbb{E}_{x\sim\mathcal{D},\,y\sim\pi(\cdot|x)}
+\left[\log\frac{\pi(y|x)}{\pi_{\mathrm{ref}}(y|x)}-\frac{r(x,y)}{\beta}\right].
+$$ {#eq:dpo_deriv_1}
 
-拆分括号，变成两个期望：
+定义有限的配分函数（partition function）：
 
-$$ = \max_{\pi}\left(\mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}[r(x,y)] - \beta\,\mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}\left[\log\frac{\pi(y|x)}{\pi_{\text{ref}}(y|x)}\right]\right) $$ {#eq:dpo_deriv_2}
+$$Z(x)=\sum_y\pi_{\mathrm{ref}}(y|x)\exp(r(x,y)/\beta).$$ {#eq:dpo_partition}
 
-提取$-1$和$\beta$：
+令 $q(y|x)=\pi_{\mathrm{ref}}(y|x)\exp(r(x,y)/\beta)/Z(x)$，则：
 
-$$ = \min_{\pi}\left(-\mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}[r(x,y)] + \beta\,\mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}\left[\log\frac{\pi(y|x)}{\pi_{\mathrm{ref}}(y|x)}\right]\right) $$ {#eq:dpo_deriv_3}
+$$
+\pi^*=\arg\min_\pi\mathbb{E}_{x\sim\mathcal{D}}
+\left[D_{\mathrm{KL}}(\pi(\cdot|x)\|q(\cdot|x))-\log Z(x)\right].
+$$ {#eq:dpo_deriv_10}
 
-除以$\beta$并合并：
+$Z(x)$ 与待优化策略无关。由 KL 非负性，当策略等于 $q$ 时取得最小值，因此：
 
-$$ = \min_{\pi}\left(\mathbb{E}_{x \sim \mathcal{D}}\mathbb{E}_{y \sim \pi(y|x)}\left[ \log\frac{\pi(y|x)}{\pi_{\text{ref}}(y|x)} - \frac{1}{\beta}r(x,y) \right]\right) $$ {#eq:dpo_deriv_4}
-
-引入分区函数$Z(x)$：
-
-$$ Z(x) = \sum_y \pi_{\text{ref}}(y|x)\exp\left(\frac{1}{\beta}r(x,y)\right) $$ {#eq:dpo_partition}
-
-$Z(x)$是对参考策略归一化的分区函数，对prompt $x$的所有回复$y$求和。
-代入后，优化目标变为：
-
-$$ \min_{\pi}\mathbb{E}_{x\sim\mathcal{D}}\mathbb{E}_{y\sim\pi(y|x)}\left[\log\frac{\pi(y|x)}{\frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\left(\frac{1}{\beta}r(x,y)\right)} - \log Z(x)\right] $$ {#eq:dpo_deriv_5}
-
-本质上，这等价于KL距离最小化：
-
-$$ \min_{\pi}\mathbb{E}_{x\sim\mathcal{D}}\left[\mathbb{D}_\text{KL} \left(\pi(y|x)||\frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\left(\frac{1}{\beta}r(x,y)\right) \right) - \log Z(x)\right] $$ {#eq:dpo_deriv_10}
-
-Gibbs不等式告诉我们，最优解$\pi^*$满足两者相等：
-
-$$ \pi^*(y|x) = \pi(y|x) = \frac{1}{Z(x)}\pi_{\text{ref}}(y|x)\exp\left(\frac{1}{\beta}r(x,y)\right) $$ {#eq:dpo_opt_policy}
+$$\pi^*(y|x)=\frac{1}{Z(x)}\pi_{\mathrm{ref}}(y|x)\exp(r(x,y)/\beta).$$ {#eq:dpo_opt_policy}
 
 #### 2. Bradley-Terry模型下的DPO目标
 
@@ -124,11 +133,20 @@ $$p^*(y_1 \succ y_2 \mid x) = \sigma\left(\beta \log \frac{\pi^*(y_1 \mid x)}{\p
 
 DPO梯度如[@eq:dpo_gradient]所示，推导如下：
 
-$$\nabla_{\theta}\mathcal{L}_{\text{DPO}}(\pi_{\theta}; \pi_{\text{ref}}) = -\nabla_{\theta}\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}\left[ \log \sigma\left(\beta \log \frac{\pi_{\theta}(y_c|x)}{\pi_{\text{ref}}(y_c|x)} - \beta \log \frac{\pi_{\theta}(y_r|x)}{\pi_{\text{ref}}(y_r|x)}\right)\right] $$ {#eq:dpo_grad_0}
+$$
+\nabla_\theta\mathcal{L}_{\mathrm{DPO}}=-\mathbb{E}_{\mathcal{D}}\left[\nabla_\theta\log\sigma(\beta h_\theta)\right].
+$$ {#eq:dpo_grad_0}
 
 利用sigmoid和log的求导性质，可化为：
 
-$$ -\mathbb{E}_{(x,y_c,y_r)\sim\mathcal{D}}\left[\beta\sigma\left(\beta\log\frac{\pi_{\theta}(y_r|x)}{\pi_{\text{ref}}(y_r|x)} - \beta\log\frac{\pi_{\theta}(y_c|x)}{\pi_{\text{ref}}(y_c|x)}\right)\left[\nabla_{\theta}\log\pi(y_c|x)-\nabla_{\theta}\log\pi(y_r|x)\right]\right] $$ {#eq:dpo_grad_3}
+$$
+\begin{aligned}
+\nabla_\theta\mathcal{L}_{\mathrm{DPO}}
+&=-\beta\mathbb{E}_{\mathcal{D}}\left[\sigma(-\beta h_\theta)\nabla_\theta h_\theta\right],\\
+\nabla_\theta h_\theta
+&=\nabla_\theta\log\pi_\theta(y_c|x)-\nabla_\theta\log\pi_\theta(y_r|x).
+\end{aligned}
+$$ {#eq:dpo_grad_3}
 
 ## 数值问题、局限与变体
 
@@ -137,18 +155,18 @@ DPO算法已出现多种变体，旨在解决其局限。
 为此，相关算法尝试重新平衡优化目标：
 
 - **REBEL**：将奖励模型分数作为选中与被拒回复之间的margin，提升RLHF问题的求解准确性 [@gao2024rebel]。
-- **保守DPO（cDPO）与身份偏好优化（IPO）**：假设偏好数据存在噪声，cDPO假定N%数据标注错误 [@rafailov2024direct]，IPO则将偏好概率改为非线性函数，弱化直接标签优化 [@azar2024general]。
+- **保守 DPO（cDPO）与恒等偏好优化（IPO）**：cDPO 用标签平滑处理潜在偏好噪声 [@rafailov2024direct]；IPO 在其一般偏好优化框架中采用恒等映射，并使用平方损失约束相对 log 概率比，以缓解对确定性偏好的过拟合 [@azar2024general]。
 - **带偏移的DPO（ODPO）**：要求选中与被拒回复的likelihood差异大于某个阈值，不再一视同仁 [@amini2024direct]。
 
 有些变体通过调整损失函数或内存优化提升学习信号或效率：
 
-- **ORPO（Odds Ratio Policy Optimization）**：直接拉高选中回复概率，并对其加小惩罚，无需参考模型，简化流程 [@hong2024reference]。
-- **SimPO（Simple Preference Optimization）**：将DPO中的log概率取平均而非求和，或加长度归一化，提升性能 [@meng2025simpo]。
+- **ORPO（Odds Ratio Policy Optimization）**：将选中回复的负对数似然与基于 odds ratio 的偏好损失结合，抑制相对不受偏好的回答，无需参考模型 [@hong2024reference]。
+- **SimPO（Simple Preference Optimization）**：以长度归一化的回答 log 概率作为隐式奖励，并引入目标奖励间隔；无需参考模型 [@meng2025simpo]。
 
 ![DPO中的偏好“位移”问题示意。](images/dpo_displacement.png){#fig:dpo_issue .center}
 
 DPO的一个突出问题是：优化目标仅仅是拉大选中与被拒回复概率的间隔。
-数值上，模型会降低两者的概率，但被拒回复降得更多（见[@fig:dpo_issue]）。
+数值上，可能出现两者概率都下降、被拒回复下降更多的情况（见[@fig:dpo_issue]）。
 这对泛化的影响尚不明确，有研究认为这会提升未被覆盖行为的概率 [@razin2024unintentional] [@ren2024learning]。
 如Cal-DPO [@xiao2024cal]、AlphaPO [@gupta2025alphapo]等方法通过调整优化过程或奖励形状缓解这种**偏好位移**。
 实际影响尚不明朗，但这可能是在线RL方法优于DPO的原因之一。
@@ -164,6 +182,9 @@ DAA如DPO的实现方式与策略梯度优化器有很大不同。
 DPO损失函数的典型实现如下 [@rafailov2024direct]：
 
 ```python
+import torch.nn.functional as F
+
+# logps 是仅对回答 token 求和的序列 log 概率；参考模型保持冻结
 pi_logratios = policy_chosen_logps - policy_rejected_logps
 ref_logratios = reference_chosen_logps - reference_rejected_logps
 
@@ -179,7 +200,7 @@ rejected_rewards = beta * (policy_rejected_logps - reference_rejected_logps).det
 
 这种方式更简单，也提升了开发体验，但有一些新的注意点：
 
-1. **KL距离为静态**：DPO等算法中，KL距离由$\beta$参数直接设定，作为距离惩罚。这是因为DPO每步梯度都朝着RLHF目标的*最优*解迈进，$\beta$决定了目标解的具体位置。RL方法则每步根据batch和最新数据调整。
+1. **$\beta$ 不是固定的 KL 距离**：$\beta$ 来自正则化系数，并在 DPO 损失中缩放 log 概率比。实际 KL 还受训练数据、学习率、训练步数与模型影响，不能由 $\beta$ 直接指定，也不保证每一步都趋近全局最优。应通过评测与实际分布漂移监测选择超参数。
 2. **缓存log概率**：简单实现中，policy和reference模型同时前向推理，方便损失计算，但会使显存消耗翻倍。可先离线计算参考模型log概率，训练时直接查表，显著降低显存需求。
 
 ## DAA与RL：在线与离线数据
